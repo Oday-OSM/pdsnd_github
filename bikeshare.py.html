@@ -1,0 +1,238 @@
+<html>
+<head>
+<title>bikeshare_2.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #7a7e85;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #5f826b; font-style: italic;}
+.s6 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+bikeshare_2.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">time</span>
+<span class="s0">import </span><span class="s1">pandas </span><span class="s0">as </span><span class="s1">pd</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+
+<span class="s2"># Dictionary mapping cities to their respective data files</span>
+<span class="s1">CITY_DATA </span><span class="s3">= {</span>
+    <span class="s4">'chicago'</span><span class="s3">: </span><span class="s4">'chicago.csv'</span><span class="s3">,</span>
+    <span class="s4">'new york city'</span><span class="s3">: </span><span class="s4">'new_york_city.csv'</span><span class="s3">,</span>
+    <span class="s4">'washington'</span><span class="s3">: </span><span class="s4">'washington.csv'</span>
+<span class="s3">}</span>
+
+<span class="s2"># Define months and days globally</span>
+<span class="s1">MONTHS </span><span class="s3">= [</span><span class="s4">'january'</span><span class="s3">, </span><span class="s4">'february'</span><span class="s3">, </span><span class="s4">'march'</span><span class="s3">, </span><span class="s4">'april'</span><span class="s3">, </span><span class="s4">'may'</span><span class="s3">, </span><span class="s4">'june'</span><span class="s3">, </span><span class="s4">'all'</span><span class="s3">]</span>
+<span class="s1">DAYS </span><span class="s3">= [</span><span class="s4">'monday'</span><span class="s3">, </span><span class="s4">'tuesday'</span><span class="s3">, </span><span class="s4">'wednesday'</span><span class="s3">, </span><span class="s4">'thursday'</span><span class="s3">, </span><span class="s4">'friday'</span><span class="s3">, </span><span class="s4">'saturday'</span><span class="s3">, </span><span class="s4">'sunday'</span><span class="s3">, </span><span class="s4">'all'</span><span class="s3">]</span>
+
+
+<span class="s0">def </span><span class="s1">get_filters</span><span class="s3">():</span>
+    <span class="s5">&quot;&quot;&quot; 
+    Asks user to specify a city, month, and day to analyze. 
+ 
+    Returns: 
+        (str) city - name of the city to analyze 
+        (str) month - name of the month to filter by, or &quot;all&quot; to apply no month filter 
+        (str) day - name of the day of week to filter by, or &quot;all&quot; to apply no day filter 
+    &quot;&quot;&quot;</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'Hello! Let</span><span class="s0">\'</span><span class="s4">s explore some US bikeshare data!'</span><span class="s3">)</span>
+
+    <span class="s2"># Get user input for city (chicago, new york city, washington)</span>
+    <span class="s0">while True</span><span class="s3">:</span>
+        <span class="s1">city </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">&quot;Enter the city name (Chicago, New York City, Washington): &quot;</span><span class="s3">).</span><span class="s1">strip</span><span class="s3">().</span><span class="s1">lower</span><span class="s3">()</span>
+        <span class="s0">if </span><span class="s1">city </span><span class="s0">in </span><span class="s1">CITY_DATA</span><span class="s3">:</span>
+            <span class="s0">break</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Invalid input. Please enter a valid city name.&quot;</span><span class="s3">)</span>
+
+    <span class="s2"># Get user input for month (all, january, february, ..., june)</span>
+    <span class="s0">while True</span><span class="s3">:</span>
+        <span class="s1">month </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">&quot;Enter the month (all, January, February, ..., June): &quot;</span><span class="s3">).</span><span class="s1">strip</span><span class="s3">().</span><span class="s1">lower</span><span class="s3">()</span>
+        <span class="s0">if </span><span class="s1">month </span><span class="s0">in </span><span class="s1">MONTHS</span><span class="s3">:</span>
+            <span class="s0">break</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Invalid input. Please enter a valid month.&quot;</span><span class="s3">)</span>
+
+    <span class="s2"># Get user input for day of week (all, monday, tuesday, ..., sunday)</span>
+    <span class="s0">while True</span><span class="s3">:</span>
+        <span class="s1">day </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">&quot;Enter the day of the week (all, Monday, Tuesday, ..., Sunday): &quot;</span><span class="s3">).</span><span class="s1">strip</span><span class="s3">().</span><span class="s1">lower</span><span class="s3">()</span>
+        <span class="s0">if </span><span class="s1">day </span><span class="s0">in </span><span class="s1">DAYS</span><span class="s3">:</span>
+            <span class="s0">break</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Invalid input. Please enter a valid day of the week.&quot;</span><span class="s3">)</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'-' </span><span class="s3">* </span><span class="s6">40</span><span class="s3">)</span>
+    <span class="s0">return </span><span class="s1">city</span><span class="s3">, </span><span class="s1">month</span><span class="s3">, </span><span class="s1">day</span>
+
+
+<span class="s0">def </span><span class="s1">load_data</span><span class="s3">(</span><span class="s1">city</span><span class="s3">, </span><span class="s1">month</span><span class="s3">, </span><span class="s1">day</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot; 
+    Loads data for the specified city and filters by month and day if applicable. 
+ 
+    Args: 
+        (str) city - name of the city to analyze 
+        (str) month - name of the month to filter by, or &quot;all&quot; to apply no month filter 
+        (str) day - name of the day of week to filter by, or &quot;all&quot; to apply no day filter 
+    Returns: 
+        df - Pandas DataFrame containing city data filtered by month and day 
+    &quot;&quot;&quot;</span>
+    <span class="s2"># Load data file into a DataFrame</span>
+    <span class="s1">df </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s1">CITY_DATA</span><span class="s3">[</span><span class="s1">city</span><span class="s3">])</span>
+
+    <span class="s2"># Convert the Start Time column to datetime</span>
+    <span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Time'</span><span class="s3">] = </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">to_datetime</span><span class="s3">(</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Time'</span><span class="s3">])</span>
+
+    <span class="s2"># Extract month and day of week from Start Time to create new columns</span>
+    <span class="s1">df</span><span class="s3">[</span><span class="s4">'month'</span><span class="s3">] = </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Time'</span><span class="s3">].</span><span class="s1">dt</span><span class="s3">.</span><span class="s1">month</span>
+    <span class="s1">df</span><span class="s3">[</span><span class="s4">'day_of_week'</span><span class="s3">] = </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Time'</span><span class="s3">].</span><span class="s1">dt</span><span class="s3">.</span><span class="s1">day_name</span><span class="s3">().</span><span class="s1">str</span><span class="s3">.</span><span class="s1">lower</span><span class="s3">()</span>
+
+    <span class="s2"># Filter by month if applicable</span>
+    <span class="s0">if </span><span class="s1">month </span><span class="s3">!= </span><span class="s4">'all'</span><span class="s3">:</span>
+        <span class="s2"># Use the index of the months list to get the corresponding int</span>
+        <span class="s1">month_index </span><span class="s3">= </span><span class="s1">MONTHS</span><span class="s3">.</span><span class="s1">index</span><span class="s3">(</span><span class="s1">month</span><span class="s3">) + </span><span class="s6">1</span>
+        <span class="s2"># Filter by month to create the new DataFrame</span>
+        <span class="s1">df </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'month'</span><span class="s3">] == </span><span class="s1">month_index</span><span class="s3">]</span>
+
+    <span class="s2"># Filter by day of week if applicable</span>
+    <span class="s0">if </span><span class="s1">day </span><span class="s3">!= </span><span class="s4">'all'</span><span class="s3">:</span>
+        <span class="s2"># Filter by day of week to create the new DataFrame</span>
+        <span class="s1">df </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'day_of_week'</span><span class="s3">] == </span><span class="s1">day</span><span class="s3">]</span>
+
+    <span class="s0">return </span><span class="s1">df</span>
+
+
+<span class="s0">def </span><span class="s1">time_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot;Displays statistics on the most frequent times of travel.&quot;&quot;&quot;</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Calculating The Most Frequent Times of Travel...</span><span class="s0">\n</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s1">start_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()</span>
+
+    <span class="s2"># Display the most common month</span>
+    <span class="s1">popular_month </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'month'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">]</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Popular Month: </span><span class="s0">{</span><span class="s1">MONTHS</span><span class="s3">[</span><span class="s1">popular_month </span><span class="s3">- </span><span class="s6">1</span><span class="s3">].</span><span class="s1">title</span><span class="s3">()</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s2"># Display the most common day of week</span>
+    <span class="s1">popular_day </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'day_of_week'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">].</span><span class="s1">title</span><span class="s3">()</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Popular Day of Week: </span><span class="s0">{</span><span class="s1">popular_day</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s2"># Display the most common start hour</span>
+    <span class="s1">df</span><span class="s3">[</span><span class="s4">'hour'</span><span class="s3">] = </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Time'</span><span class="s3">].</span><span class="s1">dt</span><span class="s3">.</span><span class="s1">hour</span>
+    <span class="s1">popular_hour </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'hour'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">]</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Popular Start Hour: </span><span class="s0">{</span><span class="s1">popular_hour</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;</span><span class="s0">\n</span><span class="s4">This took </span><span class="s0">{</span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">() - </span><span class="s1">start_time</span><span class="s0">:</span><span class="s4">.2f</span><span class="s0">} </span><span class="s4">seconds.&quot;</span><span class="s3">)</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'-' </span><span class="s3">* </span><span class="s6">40</span><span class="s3">)</span>
+
+
+<span class="s0">def </span><span class="s1">station_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot;Displays statistics on the most popular stations and trip.&quot;&quot;&quot;</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Calculating The Most Popular Stations and Trip...</span><span class="s0">\n</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s1">start_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()</span>
+
+    <span class="s2"># Display most commonly used start station</span>
+    <span class="s1">start_station </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Station'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">]</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Common Start Station: </span><span class="s0">{</span><span class="s1">start_station</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s2"># Display most commonly used end station</span>
+    <span class="s1">end_station </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'End Station'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">]</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Common End Station: </span><span class="s0">{</span><span class="s1">end_station</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s2"># Display most frequent combination of start station and end station trip</span>
+    <span class="s1">df</span><span class="s3">[</span><span class="s4">'Start-End Combination'</span><span class="s3">] = </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start Station'</span><span class="s3">] + </span><span class="s4">&quot; to &quot; </span><span class="s3">+ </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'End Station'</span><span class="s3">]</span>
+    <span class="s1">start_end_combination </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Start-End Combination'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">]</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Common Trip: </span><span class="s0">{</span><span class="s1">start_end_combination</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;</span><span class="s0">\n</span><span class="s4">This took </span><span class="s0">{</span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">() - </span><span class="s1">start_time</span><span class="s0">:</span><span class="s4">.2f</span><span class="s0">} </span><span class="s4">seconds.&quot;</span><span class="s3">)</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'-' </span><span class="s3">* </span><span class="s6">40</span><span class="s3">)</span>
+
+
+<span class="s0">def </span><span class="s1">trip_duration_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot;Displays statistics on the total and average trip duration.&quot;&quot;&quot;</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Calculating Trip Duration...</span><span class="s0">\n</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s1">start_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()</span>
+
+    <span class="s2"># Display total travel time</span>
+    <span class="s1">total_travel_time </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Trip Duration'</span><span class="s3">].</span><span class="s1">sum</span><span class="s3">()</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Total Travel Time: </span><span class="s0">{</span><span class="s1">total_travel_time</span><span class="s0">} </span><span class="s4">seconds'</span><span class="s3">)</span>
+
+    <span class="s2"># Display mean travel time</span>
+    <span class="s1">mean_travel_time </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Trip Duration'</span><span class="s3">].</span><span class="s1">mean</span><span class="s3">()</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Mean Travel Time: </span><span class="s0">{</span><span class="s1">mean_travel_time</span><span class="s0">:</span><span class="s4">.2f</span><span class="s0">} </span><span class="s4">seconds'</span><span class="s3">)</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;</span><span class="s0">\n</span><span class="s4">This took </span><span class="s0">{</span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">() - </span><span class="s1">start_time</span><span class="s0">:</span><span class="s4">.2f</span><span class="s0">} </span><span class="s4">seconds.&quot;</span><span class="s3">)</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'-' </span><span class="s3">* </span><span class="s6">40</span><span class="s3">)</span>
+
+
+<span class="s0">def </span><span class="s1">user_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot;Displays statistics on bikeshare users.&quot;&quot;&quot;</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Calculating User Stats...</span><span class="s0">\n</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s1">start_time </span><span class="s3">= </span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">()</span>
+
+    <span class="s2"># Display counts of user types</span>
+    <span class="s1">user_types </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'User Type'</span><span class="s3">].</span><span class="s1">value_counts</span><span class="s3">()</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f'User Types:</span><span class="s0">\n{</span><span class="s1">user_types</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+
+    <span class="s2"># Display counts of gender</span>
+    <span class="s0">if </span><span class="s4">'Gender' </span><span class="s0">in </span><span class="s1">df</span><span class="s3">.</span><span class="s1">columns</span><span class="s3">:</span>
+        <span class="s1">gender_counts </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Gender'</span><span class="s3">].</span><span class="s1">value_counts</span><span class="s3">()</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">f'</span><span class="s0">\n</span><span class="s4">Gender:</span><span class="s0">\n{</span><span class="s1">gender_counts</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Gender data is not available for Washington.'</span><span class="s3">)</span>
+
+    <span class="s2"># Display earliest, most recent, and most common year of birth</span>
+    <span class="s0">if </span><span class="s4">'Birth Year' </span><span class="s0">in </span><span class="s1">df</span><span class="s3">.</span><span class="s1">columns</span><span class="s3">:</span>
+        <span class="s1">earliest_year </span><span class="s3">= </span><span class="s1">int</span><span class="s3">(</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Birth Year'</span><span class="s3">].</span><span class="s1">min</span><span class="s3">())</span>
+        <span class="s1">most_recent_year </span><span class="s3">= </span><span class="s1">int</span><span class="s3">(</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Birth Year'</span><span class="s3">].</span><span class="s1">max</span><span class="s3">())</span>
+        <span class="s1">most_common_year </span><span class="s3">= </span><span class="s1">int</span><span class="s3">(</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'Birth Year'</span><span class="s3">].</span><span class="s1">mode</span><span class="s3">()[</span><span class="s6">0</span><span class="s3">])</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">f'</span><span class="s0">\n</span><span class="s4">Earliest Year of Birth: </span><span class="s0">{</span><span class="s1">earliest_year</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Recent Year of Birth: </span><span class="s0">{</span><span class="s1">most_recent_year</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">f'Most Common Year of Birth: </span><span class="s0">{</span><span class="s1">most_common_year</span><span class="s0">}</span><span class="s4">'</span><span class="s3">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s4">'Birth year data is not available for Washington.'</span><span class="s3">)</span>
+
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;</span><span class="s0">\n</span><span class="s4">This took </span><span class="s0">{</span><span class="s1">time</span><span class="s3">.</span><span class="s1">time</span><span class="s3">() - </span><span class="s1">start_time</span><span class="s0">:</span><span class="s4">.2f</span><span class="s0">} </span><span class="s4">seconds.&quot;</span><span class="s3">)</span>
+    <span class="s1">print</span><span class="s3">(</span><span class="s4">'-' </span><span class="s3">* </span><span class="s6">40</span><span class="s3">)</span>
+
+
+<span class="s0">def </span><span class="s1">display_raw_data</span><span class="s3">(</span><span class="s1">df</span><span class="s3">):</span>
+    <span class="s5">&quot;&quot;&quot;Displays raw data upon request by the user.&quot;&quot;&quot;</span>
+    <span class="s1">row_index </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">show_data </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">&quot;Would you like to see 5 lines of raw data? Enter yes or no: &quot;</span><span class="s3">).</span><span class="s1">strip</span><span class="s3">().</span><span class="s1">lower</span><span class="s3">()</span>
+    <span class="s0">while </span><span class="s1">show_data </span><span class="s3">== </span><span class="s4">'yes'</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s3">(</span><span class="s1">df</span><span class="s3">.</span><span class="s1">iloc</span><span class="s3">[</span><span class="s1">row_index</span><span class="s3">: </span><span class="s1">row_index </span><span class="s3">+ </span><span class="s6">5</span><span class="s3">])</span>
+        <span class="s1">row_index </span><span class="s3">+= </span><span class="s6">5</span>
+        <span class="s1">show_data </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">&quot;Would you like to see 5 more lines of raw data? Enter yes or no: &quot;</span><span class="s3">).</span><span class="s1">strip</span><span class="s3">().</span><span class="s1">lower</span><span class="s3">()</span>
+
+
+<span class="s0">def </span><span class="s1">main</span><span class="s3">():</span>
+    <span class="s0">while True</span><span class="s3">:</span>
+        <span class="s1">city</span><span class="s3">, </span><span class="s1">month</span><span class="s3">, </span><span class="s1">day </span><span class="s3">= </span><span class="s1">get_filters</span><span class="s3">()</span>
+        <span class="s1">df </span><span class="s3">= </span><span class="s1">load_data</span><span class="s3">(</span><span class="s1">city</span><span class="s3">, </span><span class="s1">month</span><span class="s3">, </span><span class="s1">day</span><span class="s3">)</span>
+
+        <span class="s1">time_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">)</span>
+        <span class="s1">station_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">)</span>
+        <span class="s1">trip_duration_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">)</span>
+        <span class="s1">user_stats</span><span class="s3">(</span><span class="s1">df</span><span class="s3">)</span>
+        <span class="s1">display_raw_data</span><span class="s3">(</span><span class="s1">df</span><span class="s3">)</span>
+
+        <span class="s1">restart </span><span class="s3">= </span><span class="s1">input</span><span class="s3">(</span><span class="s4">'</span><span class="s0">\n</span><span class="s4">Would you like to restart? Enter yes or no.</span><span class="s0">\n</span><span class="s4">'</span><span class="s3">)</span>
+        <span class="s0">if </span><span class="s1">restart</span><span class="s3">.</span><span class="s1">lower</span><span class="s3">() != </span><span class="s4">'yes'</span><span class="s3">:</span>
+            <span class="s0">break</span>
+
+
+<span class="s0">if </span><span class="s1">__name__</span><span class="s3">==</span><span class="s4">'__main__'</span><span class="s3">:</span>
+
+    <span class="s1">main</span><span class="s3">()</span></pre>
+</body>
+</html>
